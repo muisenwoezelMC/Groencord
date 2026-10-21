@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Groencord</title>
+<style>
+:root{--rail:#07130d;--side:#0c1f16;--main:#102a1e;--hover:#17392a;--line:#1c4130;--text:#d9ece1;--mute:#85a893;--acc:#2fbf71;--acc2:#1e9657;--bad:#e5665f;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--main);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input,select{background:var(--main);border:1px solid var(--line);border-radius:8px;color:var(--text);font:inherit;padding:9px 10px}
+#app{display:flex;height:100%}
+#rail{width:68px;background:var(--rail);display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0;overflow-y:auto;flex:none}
+.srv{width:46px;height:46px;border-radius:50%;background:var(--side);font-weight:700;display:grid;place-items:center;transition:border-radius .15s,background .15s;position:relative;flex:none}
+.srv:hover,.srv.on{border-radius:14px;background:var(--acc2)}
+.srv.on::before{content:"";position:absolute;left:-11px;width:4px;height:26px;border-radius:0 4px 4px 0;background:var(--text)}
+.srv.add{color:var(--acc);font-size:24px}
+.srv.add:hover{background:var(--acc);color:var(--rail)}
+#side{width:236px;background:var(--side);display:flex;flex-direction:column;flex:none}
+#side h2{margin:0;padding:14px 16px;font-size:15px;border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sb{flex:1;overflow-y:auto;padding:10px 8px}
+.grp{display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:12px;font-weight:600;padding:10px 8px 4px}
+.grp button{font-size:18px;color:var(--mute);line-height:1}
+.grp button:hover{color:var(--text)}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;text-align:left;padding:7px 10px;border-radius:6px;color:var(--mute)}
+.ch:hover{background:var(--hover);color:var(--text)}
+.ch.on{background:var(--hover);color:#fff}
+.ch .x{display:flex;gap:4px}
+.mini{background:var(--acc);color:#06120b;font-weight:700;border-radius:6px;padding:2px 8px;font-size:12px}
+.mini.gh{background:var(--hover);color:var(--text)}
+.note{color:var(--mute);font-size:13px;padding:6px 10px}
+.af{display:flex;gap:6px;padding:4px 4px 8px}
+.af input{flex:1;min-width:0;padding:7px 10px}
+#me{display:flex;align-items:center;gap:10px;padding:10px;background:var(--rail)}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#06120b;flex:none}
+.av.sm{width:32px;height:32px;font-size:13px}
+#me .sp{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#me button{padding:6px;border-radius:6px;font-size:18px;color:var(--mute)}
+#me button:hover{background:var(--hover);color:var(--text)}
+#chat{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{height:50px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);font-weight:600;flex:none}
+#nav{display:none;font-size:20px;padding:4px 8px;border-radius:6px}
+#msgs{flex:1;overflow-y:auto;padding:16px 0}
+.m{display:flex;gap:14px;padding:4px 16px}
+.m:hover{background:#0e261b}
+.m .b{min-width:0}
+.m .n{font-weight:600}
+.m time{color:var(--mute);font-size:12px;margin-left:8px}
+.m p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.empty{color:var(--mute);text-align:center;padding:40px 20px}
+#bar{padding:0 16px 16px;position:relative;flex:none}
+#box{display:flex;align-items:center;background:var(--hover);border-radius:10px;padding:0 6px}
+#box input{flex:1;min-width:0;background:none;border:0;padding:13px 8px}
+#box input:focus-visible{outline:0}
+#box button{padding:8px;font-size:19px;border-radius:6px;color:var(--mute)}
+#box button:hover{color:var(--acc)}
+#emo{position:absolute;right:16px;bottom:66px;background:var(--side);border:1px solid var(--line);border-radius:10px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:2px;z-index:5}
+#emo.open{display:grid}
+#emo button{font-size:22px;padding:4px;border-radius:6px}
+#emo button:hover{background:var(--hover)}
+#mem{width:220px;background:var(--side);padding:14px 8px;overflow-y:auto;flex:none}
+#mem h3{margin:0 8px 8px;font-size:12px;color:var(--mute);font-weight:600}
+.u{display:flex;align-items:center;gap:10px;padding:6px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ov{position:fixed;inset:0;background:rgba(2,10,6,.75);display:none;place-items:center;z-index:10;padding:16px}
+#ov.open{display:grid}
+.card{background:var(--side);border:1px solid var(--line);border-radius:14px;width:min(440px,100%);max-height:90%;overflow-y:auto;padding:20px}
+.card h3{margin:0 0 4px;font-size:18px}
+.card .s{margin:0 0 12px;color:var(--mute)}
+.card label{display:block;font-weight:600;margin-top:10px}
+.card input,.card select{width:100%;margin:6px 0}
+.err{color:var(--bad);min-height:20px;font-size:14px}
+.btn{background:var(--acc);color:#06120b;font-weight:700;border-radius:8px;padding:9px 16px}
+.btn:hover{background:#45d686}
+.btn.gh{background:var(--hover);color:var(--text)}
+.btn.link{background:none;color:var(--mute);padding:6px 0;font-weight:400;text-decoration:underline}
+.btn.bad{background:var(--bad);color:#1c0806}
+.btn:disabled{opacity:.5;cursor:default}
+.wide{width:100%;margin-top:8px}
+.acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+.sw{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
+.sw button.on{border-color:#fff}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--hover);border:1px solid var(--line);padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:90%}
+#toast.on{opacity:1}
+#auth,#boot{height:100%;display:grid;place-items:center;padding:16px;text-align:center;overflow:auto}
+#auth .card{text-align:left}
+@media(max-width:900px){#mem{display:none}}
+@media(max-width:640px){
+ #side{position:absolute;left:68px;top:0;bottom:0;z-index:4;transform:translateX(-120%);transition:transform .2s;box-shadow:6px 0 24px rgba(0,0,0,.5)}
+ #side.open{transform:none}
+ #nav{display:block}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="boot"><div><div style="font-size:42px">🌿</div><p id="bt">Loading…</p></div></div>
+<div id="auth" hidden></div>
+<div id="app" hidden>
+ <nav id="rail" aria-label="Servers"></nav>
+ <aside id="side">
+  <h2 id="sname"></h2>
+  <div id="sb"></div>
+  <div id="me"><div class="av" id="meav"></div><div class="sp" id="mename"></div><button data-a="settings" aria-label="Settings">⚙</button></div>
+ </aside>
+ <main id="chat">
+  <div id="top"><button id="nav" aria-label="Menu">☰</button><b id="cname"></b></div>
+  <div id="msgs" aria-live="polite"></div>
+  <div id="bar"><div id="emo"></div><div id="box"><input id="inp" type="text" autocomplete="off" maxlength="1000" aria-label="Message"><button id="eb" aria-label="Emoji">☺</button></div></div>
+ </main>
+ <aside id="mem"></aside>
+</div>
+<div id="ov"><div class="card" id="card"></div></div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ====== SETTINGS: paste your publishable key (Supabase > Project Settings > API Keys) ====== */
+const SUPABASE_URL="https://bjizpwymizjugrezdvby.supabase.co";
+const SUPABASE_KEY="sb_publishable_LXIXwxasQAt52ACng89uUg_YjSRGdNO";
+/* ========================================================================================== */
+const L=["en","nl","de","fr","es"],NAMES=["English","Nederlands","Deutsch","Français","Español"];
+const T={
+signin:"Log in|Inloggen|Anmelden|Se connecter|Iniciar sesión",
+signup:"Create account|Account maken|Konto erstellen|Créer un compte|Crear cuenta",
+email:"E-mail|E-mail|E-Mail|E-mail|Correo",
+password:"Password (min. 8)|Wachtwoord (min. 8)|Passwort (mind. 8)|Mot de passe (8 min.)|Contraseña (mín. 8)",
+forgot:"Forgot password?|Wachtwoord vergeten?|Passwort vergessen?|Mot de passe oublié ?|¿Olvidaste tu contraseña?",
+send_link:"Send reset link|Stuur resetlink|Link senden|Envoyer le lien|Enviar enlace",
+reset_sent:"Check your inbox for the reset link.|Check je mailbox voor de resetlink.|Prüfe dein Postfach für den Link.|Vérifie ta boîte mail pour le lien.|Revisa tu correo para el enlace.",
+check_inbox:"Account created. Confirm your e-mail via the message in your inbox, then log in.|Account gemaakt. Bevestig je e-mail via het bericht in je mailbox en log dan in.|Konto erstellt. Bestätige deine E-Mail im Postfach und melde dich dann an.|Compte créé. Confirme ton e-mail via le message reçu, puis connecte-toi.|Cuenta creada. Confirma tu correo con el mensaje recibido y luego inicia sesión.",
+bad_login:"Wrong e-mail or password|Verkeerde e-mail of wachtwoord|E-Mail oder Passwort falsch|E-mail ou mot de passe incorrect|Correo o contraseña incorrectos",
+unconfirmed:"Confirm your e-mail first (check your inbox)|Bevestig eerst je e-mail (check je mailbox)|Bestätige zuerst deine E-Mail|Confirme d’abord ton e-mail|Confirma primero tu correo",
+weak_pw:"Password needs at least 8 characters|Wachtwoord moet minstens 8 tekens hebben|Passwort braucht mind. 8 Zeichen|8 caractères minimum|Mínimo 8 caracteres",
+bad_email:"Enter a valid e-mail|Vul een geldig e-mail in|Gültige E-Mail eingeben|Entre un e-mail valide|Introduce un correo válido",
+provider_off:"This login method isn’t switched on yet|Deze inlogmethode staat nog niet aan|Diese Anmeldung ist noch nicht aktiv|Cette connexion n’est pas encore activée|Este método aún no está activado",
+new_pw:"Choose a new password|Kies een nieuw wachtwoord|Neues Passwort wählen|Choisis un nouveau mot de passe|Elige una nueva contraseña",
+back:"Back to log in|Terug naar inloggen|Zurück zur Anmeldung|Retour|Volver",
+no_account:"No account yet? Sign up|Nog geen account? Maak er een|Noch kein Konto? Registrieren|Pas de compte ? Inscris-toi|¿Sin cuenta? Regístrate",
+have_account:"Have an account? Log in|Al een account? Log in|Schon ein Konto? Anmelden|Déjà un compte ? Connecte-toi|¿Ya tienes cuenta? Inicia sesión",
+signout:"Log out|Uitloggen|Abmelden|Se déconnecter|Cerrar sesión",
+or:"or|of|oder|ou|o",
+welcome:"Welcome to Groencord|Welkom bij Groencord|Willkommen bei Groencord|Bienvenue sur Groencord|Bienvenido a Groencord",
+onb_sub:"Pick a username and language. Everything is free, always.|Kies een gebruikersnaam en taal. Alles is altijd gratis.|Wähle Benutzername und Sprache. Alles ist immer kostenlos.|Choisis un pseudo et une langue. Tout est toujours gratuit.|Elige un usuario e idioma. Todo es siempre gratis.",
+username:"Username|Gebruikersnaam|Benutzername|Pseudo|Usuario",
+uname_err:"Use 3–20 letters, numbers or _|Gebruik 3–20 letters, cijfers of _|3–20 Buchstaben, Zahlen oder _|3 à 20 lettres, chiffres ou _|3–20 letras, números o _",
+taken:"That username is taken|Die gebruikersnaam is bezet|Der Name ist vergeben|Ce pseudo est pris|Ese usuario ya existe",
+language:"Language|Taal|Sprache|Langue|Idioma",
+color:"Color|Kleur|Farbe|Couleur|Color",
+start:"Start|Starten|Los geht’s|Commencer|Empezar",
+friends:"Friends|Vrienden|Freunde|Amis|Amigos",
+add_friend:"Add friend|Vriend toevoegen|Freund hinzufügen|Ajouter un ami|Añadir amigo",
+add_ph:"Username|Gebruikersnaam|Benutzername|Pseudo|Usuario",
+req_sent:"Request sent|Verzoek verstuurd|Anfrage gesendet|Demande envoyée|Solicitud enviada",
+no_user:"No user with that name|Geen gebruiker met die naam|Kein Nutzer mit diesem Namen|Aucun utilisateur de ce nom|No hay usuario con ese nombre",
+self_err:"That’s you|Dat ben jijzelf|Das bist du|C’est toi|Eres tú",
+exists:"Already friends or pending|Al vrienden of in afwachting|Schon befreundet oder ausstehend|Déjà amis ou en attente|Ya sois amigos o está pendiente",
+incoming:"Requests|Verzoeken|Anfragen|Demandes|Solicitudes",
+waiting:"Waiting|Wacht op antwoord|Wartet|En attente|Esperando",
+accept:"Accept|Accepteren|Annehmen|Accepter|Aceptar",
+decline:"Remove|Verwijderen|Entfernen|Retirer|Quitar",
+no_friends:"No friends yet. Add one by username.|Nog geen vrienden. Voeg er een toe met een gebruikersnaam.|Noch keine Freunde. Füge jemanden per Benutzername hinzu.|Pas encore d’amis. Ajoute-en un avec son pseudo.|Aún no tienes amigos. Añade uno con su usuario.",
+pick:"Pick a friend or server to start chatting|Kies een vriend of server om te chatten|Wähle einen Freund oder Server zum Chatten|Choisis un ami ou un serveur pour discuter|Elige un amigo o servidor para chatear",
+no_msgs:"No messages yet. Say hi!|Nog geen berichten. Zeg hallo!|Noch keine Nachrichten. Sag hallo!|Pas encore de messages. Dis bonjour !|Aún no hay mensajes. ¡Saluda!",
+msg_ph:"Message|Bericht|Nachricht|Message|Mensaje",
+loading:"Loading…|Laden…|Lädt…|Chargement…|Cargando…",
+slow:"Slow down a little|Even rustig aan|Etwas langsamer|Doucement|Más despacio",
+too_long:"Max 1000 characters|Max 1000 tekens|Max. 1000 Zeichen|1000 caractères max|Máx. 1000 caracteres",
+channels:"Channels|Kanalen|Kanäle|Salons|Canales",
+new_server:"Create server|Server maken|Server erstellen|Créer un serveur|Crear servidor",
+join_server:"Join server|Server joinen|Server beitreten|Rejoindre un serveur|Unirse a un servidor",
+server_name:"Server name|Servernaam|Servername|Nom du serveur|Nombre del servidor",
+name_err:"Use 2–32 characters (channels: letters, numbers, -)|Gebruik 2–32 tekens (kanalen: letters, cijfers, -)|2–32 Zeichen (Kanäle: Buchstaben, Zahlen, -)|2 à 32 caractères (salons : lettres, chiffres, -)|2–32 caracteres (canales: letras, números, -)",
+code:"Invite code|Uitnodigingscode|Einladungscode|Code d’invitation|Código de invitación",
+not_found:"Not found. Check the code and try again.|Niet gevonden. Controleer de code en probeer opnieuw.|Nicht gefunden. Prüfe den Code.|Introuvable. Vérifie le code.|No encontrado. Revisa el código.",
+new_ch:"New channel|Nieuw kanaal|Neuer Kanal|Nouveau salon|Nuevo canal",
+cancel:"Cancel|Annuleren|Abbrechen|Annuler|Cancelar",
+create:"Create|Maken|Erstellen|Créer|Crear",
+join:"Join|Joinen|Beitreten|Rejoindre|Unirse",
+settings:"Settings|Instellingen|Einstellungen|Paramètres|Ajustes",
+close:"Close|Sluiten|Schließen|Fermer|Cerrar",
+invite:"Invite people|Mensen uitnodigen|Leute einladen|Inviter|Invitar",
+invite_sub:"Share this code. Others join with “Join server”.|Deel deze code. Anderen joinen via “Server joinen”.|Teile diesen Code. Andere treten über „Server beitreten“ bei.|Partage ce code. Les autres rejoignent via « Rejoindre un serveur ».|Comparte este código. Otros se unen con «Unirse a un servidor».",
+members:"Members|Leden|Mitglieder|Membres|Miembros",
+leave:"Leave server|Server verlaten|Server verlassen|Quitter le serveur|Salir del servidor",
+del_acct:"Delete my account|Mijn account verwijderen|Konto löschen|Supprimer mon compte|Eliminar mi cuenta",
+del_ask:"This deletes your account, profile, friendships, memberships and messages. It can’t be undone.|Dit verwijdert je account, profiel, vriendschappen, lidmaatschappen en berichten. Dit kan niet ongedaan worden gemaakt.|Das löscht Konto, Profil, Freundschaften, Mitgliedschaften und Nachrichten. Nicht rückgängig zu machen.|Cela supprime ton compte, profil, amitiés, adhésions et messages. Irréversible.|Esto borra tu cuenta, perfil, amistades, membresías y mensajes. No se puede deshacer.",
+del_yes:"Yes, delete|Ja, verwijderen|Ja, löschen|Oui, supprimer|Sí, eliminar",
+deleted:"Deleted user|Verwijderde gebruiker|Gelöschter Nutzer|Utilisateur supprimé|Usuario eliminado",
+err:"Something went wrong. Try again.|Er ging iets mis. Probeer opnieuw.|Etwas ist schiefgelaufen. Versuche es erneut.|Une erreur est survenue. Réessaie.|Algo salió mal. Inténtalo de nuevo.",
+privacy:"Privacy and terms|Privacy en voorwaarden|Datenschutz und Bedingungen|Confidentialité et conditions|Privacidad y términos",
+priv_txt:"Groencord stores your e-mail, username, friendships, servers and messages in a Supabase database. Server messages are visible to server members, private messages only to the two people. Be kind and don’t share private data. You can delete your account in Settings.|Groencord bewaart je e-mail, gebruikersnaam, vriendschappen, servers en berichten in een Supabase-database. Serverberichten zien alleen leden, privéberichten alleen de twee personen. Wees aardig en deel geen privégegevens. Je kunt je account verwijderen in Instellingen.|Groencord speichert E-Mail, Benutzername, Freundschaften, Server und Nachrichten in einer Supabase-Datenbank. Servernachrichten sehen nur Mitglieder, private Nachrichten nur die beiden Personen. Sei freundlich und teile keine privaten Daten. Dein Konto kannst du in den Einstellungen löschen.|Groencord stocke e-mail, pseudo, amitiés, serveurs et messages dans une base Supabase. Les messages de serveur sont visibles par les membres, les messages privés par les deux personnes. Sois sympa et ne partage pas de données privées. Tu peux supprimer ton compte dans les paramètres.|Groencord guarda correo, usuario, amistades, servidores y mensajes en una base Supabase. Los mensajes de servidor los ven los miembros y los privados solo las dos personas. Sé amable y no compartas datos privados. Puedes borrar tu cuenta en Ajustes."
+};
+let lang="en";try{lang=localStorage.getItem("gc_lang")||"en"}catch(e){}if(!L.includes(lang))lang="en";
+const t=k=>((T[k]||k).split("|")[L.indexOf(lang)])||k;
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const COL=["#2fbf71","#7ee0a8","#e8c15a","#5ec9d6","#e58a6b","#b7d96a"];
+const EMO=["😀","😂","😍","😎","🤔","😭","🔥","💚","👍","🎉","🌿","🐸","🍀","⚡","👀","🙏","💀","🚀"];
+const tm=x=>new Date(x).toLocaleTimeString(lang,{hour:"2-digit",minute:"2-digit"});
+const here=location.origin+location.pathname;
+let sb,S={me:null,prof:null,srv:[],ch:[],fr:[],mem:[],msgs:[]},names={},pend=new Set(),view={t:"home"},loadM=false,last=0,locked=false,rtM,rtF,rtS,started=false;
+
+function toast(m){const e=$("toast");e.textContent=m;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("on"),3000)}
+const err=e=>{console.error(e);toast(e&&e.message&&/rate_limited/.test(e.message)?t("slow"):t("err"))};
+function modal(h,lock){locked=!!lock;$("card").innerHTML=h;$("ov").classList.add("open");const i=$("card").querySelector("input");if(i)i.focus()}
+const shut=()=>{locked=false;$("ov").classList.remove("open")};
+function P(id){const p=names[id];if(p)return p;if(p===false)return{username:t("deleted"),color:5};if(!pend.has(id)){pend.add(id);clearTimeout(P.h);P.h=setTimeout(flush,40)}return{username:"…",color:0}}
+async function flush(){const ids=[...pend];pend.clear();if(!ids.length)return;const{data}=await sb.from("profiles").select("*").in("id",ids);(data||[]).forEach(p=>names[p.id]=p);ids.forEach(i=>{if(!names[i])names[i]=false});rSide();rMain();rMem()}
+const ini=p=>esc((p.username||"?")[0].toUpperCase());
+
+/* ---------- auth ---------- */
+function showAuth(mode){
+ $("boot").hidden=true;$("app").hidden=true;$("auth").hidden=false;
+ const up=mode==="up",rs=mode==="reset",np=mode==="newpw";
+ const title=np?"new_pw":rs?"forgot":up?"signup":"signin",btn=np?"start":rs?"send_link":up?"signup":"signin";
+ $("auth").innerHTML=`<div class="card"><h3>🌿 Groencord</h3><p class="s">${t(title)}</p>
+ ${np?"":`<label for="em">${t("email")}</label><input type="email" id="em" autocomplete="email">`}
+ ${rs?"":`<label for="pw">${t(np?"new_pw":"password")}</label><input type="password" id="pw" autocomplete="${up||np?"new-password":"current-password"}">`}
+ <div class="err" id="ae" role="alert"></div>
+ <button class="btn wide" id="ab">${t(btn)}</button>
+ ${np||rs?"":`<div class="note" style="text-align:center">${t("or")}</div><button class="btn gh wide" data-o="google">Google</button><button class="btn gh wide" data-o="apple">Apple</button>`}
+ <div style="margin-top:12px;display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+ ${np?"":`<button class="btn link" data-m="${up?"in":"up"}">${t(up?"have_account":"no_account")}</button>`}
+ ${mode==="in"?`<button class="btn link" data-m="reset">${t("forgot")}</button>`:rs?`<button class="btn link" data-m="in">${t("back")}</button>`:""}
+ <select id="lg" style="width:auto;margin-top:8px">${L.map((l,i)=>`<option value="${l}"${l==lang?" selected":""}>${NAMES[i]}</option>`).join("")}</select></div></div>`;
+ $("lg").onchange=e=>{lang=e.target.value;try{localStorage.setItem("gc_lang",lang)}catch(x){}showAuth(mode)};
+ const msg=m=>{$("ae").textContent=m};
+ const go=async()=>{
+  const em=($("em")||{}).value?.trim(),pw=($("pw")||{}).value;
+  if(!np&&!/^\S+@\S+\.\S+$/.test(em||""))return msg(t("bad_email"));
+  if(!rs&&(pw||"").length<8&&(up||np))return msg(t("weak_pw"));
+  if(!rs&&!pw)return msg(t("weak_pw"));
+  $("ab").disabled=true;setTimeout(()=>{const b=$("ab");if(b)b.disabled=false},2000);msg("");
+  let r;
+  if(np){r=await sb.auth.updateUser({password:pw});if(!r.error){history.replaceState(null,"",here);S.me=null;const{data}=await sb.auth.getSession();if(data.session)onAuth(data.session);return}}
+  else if(rs){r=await sb.auth.resetPasswordForEmail(em,{redirectTo:here});if(!r.error){msg("");toast(t("reset_sent"));return}}
+  else if(up){r=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:here}});if(!r.error&&!r.data.session){$("auth").querySelector(".s").textContent=t("check_inbox");return}}
+  else r=await sb.auth.signInWithPassword({email:em,password:pw});
+  if(r&&r.error){const m=r.error.message||"";msg(/Invalid login/i.test(m)?t("bad_login"):/not confirmed/i.test(m)?t("unconfirmed"):/at least|weak/i.test(m)?t("weak_pw"):/rate|too many|seconds/i.test(m)?t("slow"):t("err"))}};
+ $("ab").onclick=go;$("auth").onkeydown=e=>{if(e.key=="Enter"&&e.target.tagName=="INPUT")go()};
+}
+$("auth").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.m)return showAuth(b.dataset.m);
+ if(b.dataset.o){const r=await sb.auth.signInWithOAuth({provider:b.dataset.o,options:{redirectTo:here}});if(r.error)$("ae").textContent=t("provider_off")}});
+
+async function onAuth(session){
+ if(!session||!session.user){S.me=null;teardown();showAuth("in");return}
+ if(S.me===session.user.id)return;
+ S.me=session.user.id;
+ const{data,error}=await sb.from("profiles").select("*").eq("id",S.me).maybeSingle();
+ if(error)return err(error);
+ if(!data){$("boot").hidden=true;$("auth").hidden=true;$("app").hidden=false;onboard();return}
+ S.prof=data;names[S.me]=data;start();
+}
+function teardown(){[rtM,rtF,rtS].forEach(c=>c&&sb.removeChannel(c));rtM=rtF=rtS=null;S={me:null,prof:null,srv:[],ch:[],fr:[],mem:[],msgs:[]};names={};view={t:"home"};started=false;shut()}
+
+/* ---------- onboarding + settings ---------- */
+const swatches=cur=>`<div class="sw">${COL.map((c,i)=>`<button data-k="${i}" class="${i==cur?"on":""}" style="background:${c}" aria-label="${t("color")} ${i+1}"></button>`).join("")}</div>`;
+const langSel=()=>`<select id="lg2">${L.map((l,i)=>`<option value="${l}"${l==lang?" selected":""}>${NAMES[i]}</option>`).join("")}</select>`;
+function onboard(){
+ let col=0;
+ const h=()=>{modal(`<h3>${t("welcome")}</h3><p class="s">${t("onb_sub")}</p><label for="un">${t("username")}</label><input type="text" id="un" maxlength="20" autocomplete="off"><div class="err" id="ue" role="alert"></div><label for="lg2">${t("language")}</label>${langSel()}<label>${t("color")}</label>${swatches(col)}<div class="acts"><button class="btn gh" id="so">${t("signout")}</button><button class="btn" id="go">${t("start")}</button></div>`,1);
+  $("lg2").onchange=e=>{lang=e.target.value;try{localStorage.setItem("gc_lang",lang)}catch(x){}h()};
+  $("card").querySelectorAll(".sw button").forEach(b=>b.onclick=()=>{col=+b.dataset.k;$("card").querySelectorAll(".sw button").forEach(x=>x.classList.toggle("on",x===b))});
+  $("so").onclick=()=>sb.auth.signOut();
+  const go=async()=>{const v=$("un").value.trim();if(!/^[A-Za-z0-9_]{3,20}$/.test(v)){$("ue").textContent=t("uname_err");return}
+   const{data,error}=await sb.from("profiles").insert({id:S.me,username:v,color:col,lang}).select().single();
+   if(error){$("ue").textContent=error.code==="23505"?t("taken"):t("err");return}
+   S.prof=data;names[S.me]=data;shut();start()};
+  $("go").onclick=go;$("un").onkeydown=e=>{if(e.key=="Enter")go()}};
+ h();
+}
+function settings(step){
+ if(step==="del"){modal(`<h3>${t("del_acct")}</h3><p class="s">${t("del_ask")}</p><div class="acts"><button class="btn gh" data-a="settings">${t("cancel")}</button><button class="btn bad" id="dy">${t("del_yes")}</button></div>`);
+  $("dy").onclick=async()=>{const{error}=await sb.rpc("delete_my_account");if(error)return err(error);await sb.auth.signOut();teardown();showAuth("in")};return}
+ modal(`<h3>${t("settings")}</h3><label for="lg2">${t("language")}</label>${langSel()}<label>${t("color")}</label>${swatches(S.prof.color)}<hr><b>${t("privacy")}</b><p class="s" style="margin-top:6px">${t("priv_txt")}</p><div class="acts"><button class="btn gh" id="so">${t("signout")}</button><button class="btn gh" id="dl">${t("del_acct")}</button><button class="btn" data-a="shut">${t("close")}</button></div>`);
+ $("lg2").onchange=async e=>{lang=e.target.value;try{localStorage.setItem("gc_lang",lang)}catch(x){}await sb.from("profiles").update({lang}).eq("id",S.me);draw();settings()};
+ $("card").querySelectorAll(".sw button").forEach(b=>b.onclick=async()=>{const c=+b.dataset.k;const{error}=await sb.from("profiles").update({color:c}).eq("id",S.me);if(error)return err(error);S.prof.color=c;names[S.me]=S.prof;$("card").querySelectorAll(".sw button").forEach(x=>x.classList.toggle("on",x===b));draw()});
+ $("so").onclick=()=>sb.auth.signOut();$("dl").onclick=()=>settings("del");
+}
+
+/* ---------- data ---------- */
+async function start(){
+ if(started)return;started=true;lang=S.prof.lang||lang;$("boot").hidden=true;$("auth").hidden=true;$("app").hidden=false;
+ await Promise.all([loadSrv(),loadFr()]);
+ rtF=sb.channel("f-"+S.me).on("postgres_changes",{event:"*",schema:"public",table:"friendships"},loadFr).on("postgres_changes",{event:"*",schema:"public",table:"server_members",filter:"user_id=eq."+S.me},loadSrv).subscribe();
+ draw();
+}
+async function loadSrv(){const{data,error}=await sb.from("server_members").select("servers(id,name,owner,invite_code)").eq("user_id",S.me);if(error)return err(error);S.srv=data.map(x=>x.servers).filter(Boolean);if(view.t==="server"&&!S.srv.some(s=>s.id===view.sid))go({t:"home"});else rRail()}
+async function loadFr(){const{data,error}=await sb.from("friendships").select("*");if(error)return err(error);S.fr=data;[...data.flatMap(f=>[f.requester,f.addressee])].forEach(P);rSide()}
+async function loadCh(){const{data}=await sb.from("channels").select("*").eq("server_id",view.sid).order("created_at");S.ch=data||[];if(!S.ch.some(c=>c.id===view.cid)){view.cid=S.ch[0]&&S.ch[0].id;openMsgs()}rSide();rMain()}
+async function loadMem(){const{data}=await sb.from("server_members").select("user_id").eq("server_id",view.sid);S.mem=(data||[]).map(x=>x.user_id);rMem()}
+function mk(){if(view.t==="dm")return{col:"dm_key",val:[S.me,view.fid].sort().join("_")};if(view.t==="server"&&view.cid)return{col:"channel_id",val:view.cid};return null}
+function go(v){view=v;rtS&&sb.removeChannel(rtS);rtS=null;S.ch=[];S.mem=[];$("side").classList.remove("open");
+ if(v.t==="server"){rtS=sb.channel("s-"+v.sid).on("postgres_changes",{event:"*",schema:"public",table:"channels",filter:"server_id=eq."+v.sid},loadCh).on("postgres_changes",{event:"*",schema:"public",table:"server_members",filter:"server_id=eq."+v.sid},loadMem).subscribe();loadMem();loadCh()}
+ else openMsgs();
+ draw()}
+async function openMsgs(){
+ rtM&&sb.removeChannel(rtM);rtM=null;S.msgs=[];const k=mk();if(!k){loadM=false;rMain();return}
+ loadM=true;rMain();
+ const{data,error}=await sb.from("messages").select("*").eq(k.col,k.val).order("created_at",{ascending:false}).limit(100);
+ const cur=mk();if(!cur||cur.val!==k.val)return;
+ loadM=false;if(error)err(error);S.msgs=(data||[]).reverse();S.msgs.forEach(m=>P(m.user_id));rMain();
+ rtM=sb.channel("m-"+Date.now()).on("postgres_changes",{event:"*",schema:"public",table:"messages",filter:k.col+"=eq."+k.val},p=>{
+  if(p.eventType==="INSERT"&&!S.msgs.some(m=>m.id===p.new.id)){S.msgs.push(p.new);P(p.new.user_id)}else if(p.eventType==="DELETE")S.msgs=S.msgs.filter(m=>m.id!==p.old.id);rMain()}).subscribe();
+}
+async function send(){
+ const inp=$("inp"),v=inp.value.trim(),k=mk();if(!v||!k)return;if(v.length>1000)return toast(t("too_long"));if(Date.now()-last<800)return toast(t("slow"));last=Date.now();inp.value="";
+ const{error}=await sb.from("messages").insert({user_id:S.me,[k.col]:k.val,body:v});if(error){inp.value=v;err(error)}}
+async function addFriend(){
+ const v=$("af").value.trim();if(!v)return;
+ const{data,error}=await sb.from("profiles").select("id").ilike("username",v.replace(/[\\_%]/g,"\\$&")).limit(1);
+ if(error)return err(error);if(!data.length)return toast(t("no_user"));const o=data[0].id;if(o===S.me)return toast(t("self_err"));
+ const r=await sb.from("friendships").insert({requester:S.me,addressee:o});
+ if(r.error)return r.error.code==="23505"?toast(t("exists")):err(r.error);$("af").value="";toast(t("req_sent"));loadFr()}
+
+/* ---------- modals ---------- */
+function srvModal(){
+ modal(`<h3>${t("new_server")}</h3><input type="text" id="sn" maxlength="32" placeholder="${t("server_name")}"><div class="acts"><button class="btn" id="mk">${t("create")}</button></div><hr><h3>${t("join_server")}</h3><input type="text" id="sc" placeholder="${t("code")}"><div class="acts"><button class="btn gh" data-a="shut">${t("cancel")}</button><button class="btn" id="jn">${t("join")}</button></div>`);
+ $("mk").onclick=async()=>{const n=$("sn").value.trim();if(n.length<2||n.length>32)return toast(t("name_err"));
+  const{data,error}=await sb.from("servers").insert({name:n,owner:S.me}).select().single();if(error)return err(error);shut();await loadSrv();go({t:"server",sid:data.id})};
+ $("jn").onclick=async()=>{const c=$("sc").value.trim();if(!c)return;const{data,error}=await sb.rpc("join_server",{code:c});if(error)return/not_found/.test(error.message)?toast(t("not_found")):err(error);shut();await loadSrv();go({t:"server",sid:data})};
+}
+function chModal(){
+ modal(`<h3>${t("new_ch")}</h3><input type="text" id="cn" maxlength="24" placeholder="general-2"><div class="acts"><button class="btn gh" data-a="shut">${t("cancel")}</button><button class="btn" id="cm">${t("create")}</button></div>`);
+ $("cm").onclick=async()=>{const n=$("cn").value.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if(n.length<2)return toast(t("name_err"));
+  const{data,error}=await sb.from("channels").insert({server_id:view.sid,name:n}).select().single();if(error)return err(error);shut();view.cid=data.id;await loadCh();openMsgs()};
+}
+async function leave(){const{error}=await sb.from("server_members").delete().eq("server_id",view.sid).eq("user_id",S.me);if(error)return err(error);await loadSrv();go({t:"home"})}
+
+/* ---------- render ---------- */
+const curSrv=()=>S.srv.find(s=>s.id===view.sid);
+function rRail(){$("rail").innerHTML=`<button class="srv${view.t!=="server"?" on":""}" data-a="home" aria-label="${t("friends")}">🌿</button>`+S.srv.map(s=>`<button class="srv${view.t==="server"&&view.sid===s.id?" on":""}" data-s="${s.id}" title="${esc(s.name)}" aria-label="${esc(s.name)}">${esc(s.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase())}</button>`).join("")+`<button class="srv add" data-a="srvmodal" aria-label="${t("new_server")}">+</button>`}
+function rSide(){
+ const s=$("sb");
+ if(view.t==="server"){const sv=curSrv();if(!sv){s.innerHTML=`<div class="note">${t("loading")}</div>`;return}
+  $("sname").textContent=sv.name;
+  s.innerHTML=`<div class="grp">${t("channels")}${sv.owner===S.me?`<button data-a="newch" aria-label="${t("new_ch")}">+</button>`:""}</div>`+S.ch.map(c=>`<button class="ch${c.id===view.cid?" on":""}" data-c="${c.id}"># ${esc(c.name)}</button>`).join("")+`<div class="grp"></div><button class="ch" data-a="invite">🔗 ${t("invite")}</button>`+(sv.owner!==S.me?`<button class="ch" data-a="leave">↩ ${t("leave")}</button>`:"");return}
+ $("sname").textContent=t("friends");
+ const other=f=>f.requester===S.me?f.addressee:f.requester;
+ const inc=S.fr.filter(f=>f.status==="pending"&&f.addressee===S.me),out=S.fr.filter(f=>f.status==="pending"&&f.requester===S.me),ok=S.fr.filter(f=>f.status==="accepted");
+ const af=$("af"),keep=af?af.value:"";
+ s.innerHTML=`<div class="af"><input type="text" id="af" placeholder="${t("add_ph")}" maxlength="20" aria-label="${t("add_friend")}"><button class="mini" data-a="addf" aria-label="${t("add_friend")}">+</button></div>`
+ +(inc.length?`<div class="grp">${t("incoming")}</div>`+inc.map(f=>`<div class="ch"><span>${esc(P(other(f)).username)}</span><span class="x"><button class="mini" data-ok="${f.id}">${t("accept")}</button><button class="mini gh" data-no="${f.id}" aria-label="${t("decline")}">✕</button></span></div>`).join(""):"")
+ +`<div class="grp">${t("friends")}</div>`+(ok.length?ok.map(f=>`<div class="ch${view.t==="dm"&&view.fid===other(f)?" on":""}" data-f="${other(f)}" style="cursor:pointer"><span>${esc(P(other(f)).username)}</span><button class="mini gh" data-no="${f.id}" aria-label="${t("decline")}">✕</button></div>`).join(""):`<div class="note">${t("no_friends")}</div>`)
+ +(out.length?`<div class="grp">${t("waiting")}</div>`+out.map(f=>`<div class="ch"><span>${esc(P(other(f)).username)}</span><button class="mini gh" data-no="${f.id}" aria-label="${t("decline")}">✕</button></div>`).join(""):"");
+ const n=$("af");n.value=keep;n.onkeydown=e=>{if(e.key=="Enter")addFriend()}}
+function rMain(){
+ const m=$("msgs"),k=mk();let title=t("friends");
+ if(view.t==="dm")title="@ "+P(view.fid).username;else if(view.t==="server"){const c=S.ch.find(c=>c.id===view.cid);title=c?"# "+c.name:"…"}
+ $("cname").textContent=title;$("inp").disabled=!k;$("inp").placeholder=t("msg_ph");
+ if(!k)m.innerHTML=`<div class="empty">${t("pick")}</div>`;
+ else if(loadM)m.innerHTML=`<div class="empty">${t("loading")}</div>`;
+ else if(!S.msgs.length)m.innerHTML=`<div class="empty">${t("no_msgs")}</div>`;
+ else m.innerHTML=S.msgs.map(x=>{const p=P(x.user_id),c=COL[p.color||0];return`<div class="m"><div class="av sm" style="background:${c}">${ini(p)}</div><div class="b"><span class="n" style="color:${c}">${esc(p.username)}</span><time>${tm(x.created_at)}</time><p>${esc(x.body)}</p></div></div>`}).join("");
+ m.scrollTop=1e9}
+function rMem(){$("mem").innerHTML=view.t==="server"?`<h3>${t("members").toUpperCase()} — ${S.mem.length}</h3>`+S.mem.map(id=>{const p=P(id);return`<div class="u"><div class="av sm" style="background:${COL[p.color||0]}">${ini(p)}</div>${esc(p.username)}</div>`}).join(""):""}
+function rMe(){if(!S.prof)return;$("meav").style.background=COL[S.prof.color||0];$("meav").textContent=S.prof.username[0].toUpperCase();$("mename").textContent=S.prof.username}
+function draw(){document.documentElement.lang=lang;rRail();rSide();rMain();rMem();rMe()}
+
+/* ---------- events ---------- */
+document.addEventListener("click",async e=>{
+ const b=e.target.closest("button"),row=e.target.closest("[data-f]");
+ if(b&&b.dataset.no){e.stopPropagation();const{error}=await sb.from("friendships").delete().eq("id",b.dataset.no);if(error)return err(error);if(view.t==="dm")go({t:"home"});return loadFr()}
+ if(row&&!(b&&b.dataset.no))return go({t:"dm",fid:row.dataset.f});
+ if(!b)return;const d=b.dataset;
+ if(d.s)return go({t:"server",sid:d.s});
+ if(d.c){view.cid=d.c;openMsgs();rSide();rMain();$("side").classList.remove("open");return}
+ if(d.ok){const{error}=await sb.from("friendships").update({status:"accepted"}).eq("id",d.ok);return error?err(error):loadFr()}
+ switch(d.a){case"home":return go({t:"home"});case"srvmodal":return srvModal();case"settings":return S.prof&&settings();case"shut":return shut();case"newch":return chModal();case"leave":return leave();case"addf":return addFriend();
+  case"invite":return modal(`<h3>${t("invite")}</h3><p class="s">${t("invite_sub")}</p><input type="text" readonly value="${esc((curSrv()||{}).invite_code||"")}" onfocus="this.select()"><div class="acts"><button class="btn" data-a="shut">${t("close")}</button></div>`)}
+});
+$("ov").onclick=e=>{if(e.target.id=="ov"&&!locked)shut()};
+$("nav").onclick=()=>$("side").classList.toggle("open");
+$("eb").onclick=()=>$("emo").classList.toggle("open");
+$("emo").innerHTML=EMO.map(x=>`<button>${x}</button>`).join("");
+$("emo").onclick=e=>{if(e.target.tagName=="BUTTON"){$("inp").value+=e.target.textContent;$("inp").focus()}};
+$("inp").onkeydown=e=>{if(e.key=="Enter")send()};
+document.onkeydown=e=>{if(e.key=="Escape"){if(!locked)shut();$("emo").classList.remove("open")}};
+
+/* ---------- boot ---------- */
+$("bt").textContent=t("loading");
+if(SUPABASE_KEY.startsWith("PASTE")||!window.supabase){$("boot").innerHTML=`<div class="card" style="text-align:left"><h3>Setup needed</h3><p class="s">Open index.html and paste your Supabase publishable key at the top (SUPABASE_KEY). It is in Supabase under Project Settings, API Keys.</p></div>`}
+else{
+ sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ sb.auth.onAuthStateChange((ev,session)=>{
+  if(ev==="PASSWORD_RECOVERY"){showAuth("newpw");return}
+  if(ev==="SIGNED_OUT"){S.me&&teardown();showAuth("in");return}
+  if(ev==="INITIAL_SESSION"||ev==="SIGNED_IN")setTimeout(()=>onAuth(session),0)});
+}
+</script>
+</body>
+</html>
